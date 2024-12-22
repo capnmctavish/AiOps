@@ -50,5 +50,5 @@ This repository contains a Streamlit-based AIOps dashboard tailored for a **glob
 
 1. **Clone or Download** this repository:
    ```bash
-   git clone https://github.com/yourusername/telecom-aiops-dashboard.git
+   git clone https://github.com/capnmctavish/telecom-aiops-dashboard.git
    cd telecom-aiops-dashboard
