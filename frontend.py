@@ -8,55 +8,84 @@ from sklearn.cluster import KMeans
 from sklearn.linear_model import LinearRegression
 
 # ----------------------
-# Mock Telecom Hierarchy for Telescopic Filters
+# Custom CSS for Dark Theme
 # ----------------------
+# You could tweak colors, fonts, etc. to match your brand or the screenshot style.
+DARK_THEME_CSS = """
+<style>
+body {
+    background-color: #222222;
+    color: #f0f0f0;
+}
+.sidebar .sidebar-content {
+    background-color: #2e2e2e;
+}
+.reportview-container .main .block-container {
+    color: #f0f0f0;
+    background-color: #222222;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+}
+.stMetric, .st-table, .stDataFrameContainer {
+    background-color: #2d2d2d;
+}
+div.stButton > button:first-child {
+    background-color: #444444;
+    color: #f0f0f0;
+    border: none;
+}
+</style>
+"""
+
+# Mock Telecom Hierarchy + Potential GenAI Divisions/Projects
 TELECOM_HIERARCHY = {
     "Consumer": {
         "Wireless": {
-            "North America": ["5G Service", "4G LTE", "Fixed Wireless"],
-            "EMEA": ["5G Service", "4G LTE"],
-            "APAC": ["5G Service", "4G LTE", "NB-IoT"],
-            "LATAM": ["5G Service", "4G LTE"]
+            "North America": ["5G GenAI Chatbot Service", "4G Recommendation Engine", "Fixed Wireless Edge ML"],
+            "EMEA": ["5G GenAI Chatbot Service", "4G LTE"],
+            "APAC": ["5G RAN + LLM", "Edge GPU Inference"],
+            "LATAM": ["4G Predictive Text", "NB-IoT ML"]
         },
         "Broadband": {
-            "North America": ["Fiber Internet", "DSL"],
-            "EMEA": ["Fiber Internet"],
-            "APAC": ["Fiber Internet", "DSL"],
-            "LATAM": ["DSL"]
+            "North America": ["Fiber Internet HPC Cluster", "DSL + Chatbot Edge"],
+            "EMEA": ["Fiber HPC Shared"],
+            "APAC": ["Fiber HPC Shared", "DSL + AI Pipeline"],
+            "LATAM": ["DSL + GPU Node"]
         }
     },
     "Enterprise": {
-        "Managed Services": {
-            "North America": ["VPN Solutions", "SASE", "SD-WAN"],
-            "EMEA": ["VPN Solutions", "SD-WAN"],
-            "APAC": ["SD-WAN", "IoT Platform"],
-            "LATAM": ["VPN Solutions"]
-        },
         "Cloud & Hosting": {
-            "North America": ["Cloud Hosting", "Bare Metal Servers"],
-            "EMEA": ["Cloud Hosting"],
-            "APAC": ["Cloud Hosting", "Bare Metal Servers"],
-            "LATAM": ["Cloud Hosting"]
+            "North America": ["Cloud Hosting + LLM Deployment", "Bare Metal GPU Servers"],
+            "EMEA": ["Cloud Hosting + HPC"],
+            "APAC": ["Cloud Hosting + GPU HPC", "Bare Metal A100 Cluster"],
+            "LATAM": ["Cloud Hosting + GPU HPC"]
+        },
+        "Managed Services": {
+            "North America": ["VPN + LLM Access", "SASE + AI Monitoring", "SD-WAN + ML Ops"],
+            "EMEA": ["VPN Solutions", "SD-WAN + HPC Edge"],
+            "APAC": ["SD-WAN + AI Inference", "IoT Platform + GPT"],
+            "LATAM": ["VPN Solutions"]
         }
     },
     "Wholesale": {
         "Carrier Services": {
-            "North America": ["Long-Haul Transport", "Colocation"],
-            "EMEA": ["Long-Haul Transport"],
-            "APAC": ["Submarine Cables"],
-            "LATAM": ["Long-Haul Transport"]
+            "North America": ["Long-Haul Transport HPC", "Colocation HPC AI Labs"],
+            "EMEA": ["Long-Haul Transport + HPC AI"],
+            "APAC": ["Submarine Cables + GPU Hosting"],
+            "LATAM": ["Long-Haul Transport + LLM Models"]
         }
     }
 }
 
-NETWORK_TYPES = ["5G RAN", "4G LTE", "Fiber", "DSL", "Cable", "IoT Network"]
+NETWORK_TYPES = ["5G RAN", "4G LTE", "Fiber", "DSL", "Cable", "IoT Network", "Kubernetes/GKE", "Serverless (Cloud Run)", "Function Apps", "HPC Cluster"]
 ENVIRONMENTS = ["Production", "Pre-Production", "Test", "Sandbox"]
-TIME_RANGE_OPTIONS = ["Last 6 hrs", "Last 12 hrs", "Last 24 hrs", "Last 48 hrs"]
-TIME_RANGE_TO_HOURS = {
-    "Last 6 hrs": 6,
-    "Last 12 hrs": 12,
-    "Last 24 hrs": 24,
-    "Last 48 hrs": 48
+TIME_RANGE_OPTIONS = ["Last 5 min", "Last 15 min", "Last 1 hr", "Last 24 hr"]
+TIME_RANGE_MAP = {
+    "Last 5 min": 5,
+    "Last 15 min": 15,
+    "Last 1 hr": 60,
+    "Last 24 hr": 1440
 }
 
 def get_divisions():
@@ -74,35 +103,50 @@ def get_services(selected_division, selected_bu, selected_region):
 # ----------------------
 # Mock Data Generators
 # ----------------------
-def generate_infrastructure_data(num_points=24):
+def generate_infrastructure_data(num_points=10):
     now = datetime.now()
-    times = [now - timedelta(hours=i) for i in reversed(range(num_points))]
-    cpu_usage = np.random.randint(10, 95, size=num_points)
-    mem_usage = np.random.randint(20, 90, size=num_points)
+    # We'll assume one data point per minute for the range we have.
+    times = [now - timedelta(minutes=i) for i in reversed(range(num_points))]
+    cpu_usage = np.random.randint(5, 95, size=num_points)
+    mem_usage = np.random.randint(10, 95, size=num_points)
+    disk_io = np.random.randint(100, 3000, size=num_points)
+    # For GPU usage, relevant to GenAI
+    gpu_usage = np.random.randint(0, 100, size=num_points)
     network_in = np.random.randint(100, 2000, size=num_points)
     network_out = np.random.randint(100, 2000, size=num_points)
-    disk_io = np.random.randint(10, 1000, size=num_points)
     df = pd.DataFrame({
         'timestamp': times,
         'CPU %': cpu_usage,
         'Memory %': mem_usage,
+        'Disk I/O (IOPS)': disk_io,
+        'GPU %': gpu_usage,
         'Network IN (MB)': network_in,
-        'Network OUT (MB)': network_out,
-        'Disk I/O (IOPS)': disk_io
+        'Network OUT (MB)': network_out
     })
     return df
 
 def generate_incidents_data():
+    # Include some GenAI & Kubernetes/GKE/Serverless-specific issues
+    possible_issues = [
+        "OOMKilled on GKE Pod",
+        "GPU out of memory during LLM training",
+        "High concurrency scaling error on Cloud Run",
+        "Kernel panic on HPC node",
+        "Python env mismatch in Function App",
+        "High CPU usage on GPT inference",
+        "Disk I/O bottleneck in HPC GPU cluster",
+        "Network latency on multi-region ML inference"
+    ]
     mock_incidents = []
-    for i in range(1, 10):
+    for i in range(1, 6):
         severity = random.choice(["P1", "P2", "P3"])
-        is_machine_identified = random.choice([True, False])
+        machine_identified = random.choice([True, False])
         status = random.choice(["Open", "Resolved"])
-        desc = f"Mock incident {i} - {random.choice(['High CPU', 'Network Latency', 'Memory Leak', 'Disk Errors'])}"
+        desc = f"Incident {i}: {random.choice(possible_issues)}"
         mock_incidents.append({
             "id": 1000 + i,
             "severity": severity,
-            "machine_identified": is_machine_identified,
+            "machine_identified": machine_identified,
             "status": status,
             "description": desc
         })
@@ -110,10 +154,10 @@ def generate_incidents_data():
     return df
 
 def generate_security_data():
-    critical_events = random.randint(0, 5)
-    high_events = random.randint(5, 15)
-    medium_events = random.randint(5, 25)
-    compliance_score = random.randint(80, 95)
+    critical_events = random.randint(0, 3)
+    high_events = random.randint(4, 10)
+    medium_events = random.randint(5, 20)
+    compliance_score = random.randint(80, 97)
     data = {
         "Critical Events": critical_events,
         "High Events": high_events,
@@ -123,16 +167,16 @@ def generate_security_data():
     return data
 
 def generate_cost_data():
-    current_spend = random.randint(50000, 90000)
-    budget = 80000
+    current_spend = random.randint(25000, 90000)
+    budget = 70000
     anomalies = random.choice([True, False])
     return current_spend, budget, anomalies
 
 # ----------------------
-# Basic ML Functions
+# Basic ML Approaches
 # ----------------------
 def detect_anomalies(df):
-    numeric_cols = ['CPU %', 'Memory %', 'Network IN (MB)', 'Network OUT (MB)', 'Disk I/O (IOPS)']
+    numeric_cols = ['CPU %', 'Memory %', 'GPU %', 'Network IN (MB)', 'Network OUT (MB)', 'Disk I/O (IOPS)']
     data = df[numeric_cols].values
     iso_forest = IsolationForest(contamination=0.1, random_state=42)
     iso_forest.fit(data)
@@ -143,7 +187,7 @@ def detect_anomalies(df):
     return df
 
 def cluster_usage_patterns(df):
-    numeric_cols = ['CPU %', 'Memory %', 'Network IN (MB)', 'Network OUT (MB)', 'Disk I/O (IOPS)']
+    numeric_cols = ['CPU %', 'Memory %', 'GPU %', 'Network IN (MB)', 'Network OUT (MB)', 'Disk I/O (IOPS)']
     data = df[numeric_cols].values
     kmeans = KMeans(n_clusters=3, random_state=42, n_init='auto')
     kmeans.fit(data)
@@ -153,16 +197,16 @@ def cluster_usage_patterns(df):
 
 def generate_predicted_data(df):
     df_sorted = df.sort_values(by='timestamp')
-    df_sorted['hour_index'] = range(len(df_sorted))
-    X = df_sorted[['hour_index']]
+    df_sorted['index'] = range(len(df_sorted))
+    X = df_sorted[['index']]
     y = df_sorted['CPU %']
     model = LinearRegression()
     model.fit(X, y)
-    future_hours = 6
-    last_index = df_sorted['hour_index'].max()
-    future_indices = np.arange(last_index+1, last_index+1+future_hours)
+    future_points = 6
+    last_index = df_sorted['index'].max()
+    future_indices = np.arange(last_index+1, last_index+1+future_points)
     y_pred = model.predict(future_indices.reshape(-1, 1))
-    future_ts = [df_sorted['timestamp'].iloc[-1] + timedelta(hours=i+1) for i in range(future_hours)]
+    future_ts = [df_sorted['timestamp'].iloc[-1] + timedelta(minutes=i+1) for i in range(future_points)]
     pred_df = pd.DataFrame({
         'timestamp': future_ts,
         'Predicted CPU %': y_pred
@@ -170,13 +214,11 @@ def generate_predicted_data(df):
     return pred_df
 
 def main():
-    st.set_page_config(page_title="Telco AIOps with ML", layout="wide")
-    st.title("Telco AIOps Dashboard with ML (Telescopic Filters, Anomalies, Clustering, Prediction)")
+    st.set_page_config(page_title="AIOps Dashboard - Global Telecom Operator", layout="wide")
+    st.markdown(DARK_THEME_CSS, unsafe_allow_html=True)
+    st.title("AIOps Dashboard - Global Telecom Operator")
+    st.sidebar.title("Telco Filters")
 
-    # ----------------------
-    # Sidebar: Telco Filters + ML Toggles
-    # ----------------------
-    st.sidebar.title("Telco Scoping & Settings")
     divisions = get_divisions()
     selected_division = st.sidebar.selectbox("Select Division", divisions)
     bus_units = get_business_units(selected_division)
@@ -188,129 +230,116 @@ def main():
     selected_net_type = st.sidebar.selectbox("Network Type", NETWORK_TYPES)
     selected_env = st.sidebar.selectbox("Environment", ENVIRONMENTS)
     selected_time_range = st.sidebar.selectbox("Time Range", TIME_RANGE_OPTIONS)
-    hours_to_fetch = TIME_RANGE_TO_HOURS[selected_time_range]
-    st.sidebar.markdown("---")
-    show_anomalies = st.sidebar.checkbox("Show Anomalies (IsolationForest)", value=True)
-    show_clusters = st.sidebar.checkbox("Show Clusters (KMeans)", value=True)
+    minutes_to_fetch = TIME_RANGE_MAP[selected_time_range]
+    st.sidebar.markdown("### ML Toggles")
+    show_anomalies = st.sidebar.checkbox("Show Anomalies", value=True)
+    show_clusters = st.sidebar.checkbox("Show Clusters", value=True)
     show_prediction = st.sidebar.checkbox("Show Predictive CPU Trend", value=True)
 
-    st.write(f"**Scope:** {selected_division} > {selected_bu} > {selected_region} > {selected_service} | **Network:** {selected_net_type} | **Env:** {selected_env} | **Time Range:** {selected_time_range}")
+    scope_text = f"Scope: {selected_division} > {selected_bu} > {selected_region} > {selected_service} | Network: {selected_net_type} | Environment: {selected_env} | Time: {selected_time_range}"
+    st.write(scope_text)
 
-    st.write(f"**ML Toggles:** Anomalies={show_anomalies}, Clusters={show_clusters}, Prediction={show_prediction}")
+    # Mock key metrics (MTTI, MTTR, Machine Identified ratio, Monthly spend)
+    mtti_value = round(random.uniform(3.0, 6.0), 1)
+    mtti_delta = random.choice([-0.1, 0.15, 0.2, -0.05])
+    mttr_value = round(random.uniform(10, 30), 1)
+    mttr_delta = random.choice([-0.2, 0.25, 0.1, -0.1])
+    machine_ratio = random.randint(50, 90)
+    machine_delta = random.choice([-5, -2, 3, 5])
+    cost_spend, budget, cost_anomaly = generate_cost_data()
+    cost_diff = cost_spend - budget
 
-    # ----------------------
-    # Generate Mock Data
-    # ----------------------
-    df_infra = generate_infrastructure_data(num_points=hours_to_fetch)
+    col_k1, col_k2, col_k3, col_k4 = st.columns(4)
+    with col_k1:
+        delta_color_mtti = "normal" if mtti_delta < 0 else "inverse"
+        st.metric("MTTI (Mean Time to Identify)", f"{mtti_value} min", f"{mtti_delta*100:.1f}% vs prev", delta_color=delta_color_mtti)
+    with col_k2:
+        delta_color_mttr = "normal" if mttr_delta < 0 else "inverse"
+        st.metric("MTTR (Mean Time to Repair)", f"{mttr_value} min", f"{mttr_delta*100:.1f}% vs prev", delta_color=delta_color_mttr)
+    with col_k3:
+        mir_delta_color = "normal" if machine_delta > 0 else "inverse"
+        st.metric("Machine-Identified Alerts", f"{machine_ratio}%", f"{machine_delta}%", delta_color=mir_delta_color)
+    with col_k4:
+        cost_delta_color = "inverse" if cost_diff > 0 else "normal"
+        st.metric("Monthly Cloud/Network Spend", f"${cost_spend}", f"${cost_diff} vs Budget", delta_color=cost_delta_color)
+
+    # Generate Data
+    df_infra = generate_infrastructure_data(num_points=minutes_to_fetch)
+    df_infra_sorted = df_infra.sort_values(by="timestamp")
     df_incidents = generate_incidents_data()
     security_data = generate_security_data()
-    cost_spend, budget, cost_anomaly = generate_cost_data()
 
-    # ----------------------
-    # Apply ML if toggled
-    # ----------------------
+    # ML pipeline
     if show_anomalies:
-        df_infra = detect_anomalies(df_infra)
+        df_infra_sorted = detect_anomalies(df_infra_sorted)
     if show_clusters:
-        df_infra = cluster_usage_patterns(df_infra)
+        df_infra_sorted = cluster_usage_patterns(df_infra_sorted)
     if show_prediction:
-        pred_df = generate_predicted_data(df_infra)
+        pred_df = generate_predicted_data(df_infra_sorted)
 
-    # ----------------------
-    # KPI / Alerts section
-    # ----------------------
-    st.subheader("Incidents & Alerts")
+    st.subheader("Active Incidents")
     open_incidents = df_incidents[df_incidents['status'] == "Open"]
     p1_incidents = open_incidents[open_incidents['severity'] == "P1"]
-    col_kpi1, col_kpi2 = st.columns(2)
-    with col_kpi1:
-        st.metric(label="Total Open Incidents", value=len(open_incidents))
-    with col_kpi2:
-        st.metric(label="P1 Incidents", value=len(p1_incidents))
-    with st.expander("View All Incidents"):
-        st.dataframe(df_incidents)
+    st.write(f"Total Open Incidents: **{len(open_incidents)}** | P1 Incidents: **{len(p1_incidents)}**")
+    st.dataframe(df_incidents, height=200)
 
-    # ----------------------
-    # Main Layout: 3 columns
-    # ----------------------
-    left_col, center_col, right_col = st.columns([1, 2, 1])
-    # Left: Real-Time Alerts / Potential
+    left_col, center_col, right_col = st.columns([1,2,1])
     with left_col:
-        st.subheader("Alerts Feed (Sample)")
-        alerts_feed = [
-            "Critical: 5G Cell Overload in North America",
-            "Major: Fiber Cut - EMEA Route",
-            "Warning: SD-WAN Latency Spike in APAC",
-            "Info: IoT Sensor Surge in LATAM"
-        ]
-        for alert in alerts_feed:
-            st.write(f"- {alert}")
+        st.subheader("Infrastructure Metrics")
+        st.line_chart(df_infra_sorted.set_index('timestamp')[['CPU %','Memory %','GPU %']], height=300)
+        st.write("**Disk I/O (IOPS)**")
+        st.line_chart(df_infra_sorted.set_index('timestamp')[['Disk I/O (IOPS)']], height=150)
+
+    with center_col:
+        st.subheader("Network Throughput (MB)")
+        st.line_chart(df_infra_sorted.set_index('timestamp')[['Network IN (MB)','Network OUT (MB)']], height=200)
+        if show_anomalies:
+            st.subheader("Anomalies Detected")
+            anoms = df_infra_sorted[df_infra_sorted['is_anomaly']==True]
+            if len(anoms) > 0:
+                st.table(anoms[['timestamp','CPU %','Memory %','GPU %','Network IN (MB)','Network OUT (MB)','Disk I/O (IOPS)','anomaly_score']])
+            else:
+                st.success("No anomalies detected in this time range.")
+        if show_clusters:
+            st.subheader("Usage Clusters")
+            if 'usage_cluster' in df_infra_sorted.columns:
+                cluster_counts = df_infra_sorted['usage_cluster'].value_counts().sort_index()
+                cluster_map = {0:"Low Usage Pattern",1:"Medium Usage Pattern",2:"High Usage Pattern"}
+                st.write("**Cluster distribution**:")
+                for cidx in cluster_counts.index:
+                    st.write(f"- Cluster {cidx} ({cluster_map.get(cidx,'Unknown')}): {cluster_counts[cidx]} data points")
+
+    with right_col:
         st.subheader("Security & Compliance")
         sec_df = pd.DataFrame([security_data])
         st.table(sec_df)
         st.subheader("Cost & Resource Efficiency")
         if cost_anomaly:
-            st.warning("Cost anomaly detected! Investigate usage spikes or potential misconfigurations.")
+            st.warning("Cost anomaly detected! Investigate for GPU or concurrency overuse.")
         else:
-            st.success("No current cost anomalies detected.")
-        st.write("Underutilized Resources (Mock)")
+            st.success("No cost anomalies. Spend within expected range.")
+        st.write("Underutilized HPC/GPU Nodes (Sample)")
         underutilized = [
-            {"Resource": "5G-Cell-NY-001", "CPU%": 12, "Memory%": 25},
-            {"Resource": "SD-WAN-APAC-Node3", "CPU%": 10, "Memory%": 20},
+            {"Resource":"GPU-Node-001","GPU%":10,"Memory%":25},
+            {"Resource":"GKE-Pool-02","CPU%":12,"Memory%":30}
         ]
         st.table(pd.DataFrame(underutilized))
 
-    # Center: Charts for Infra Metrics
-    with center_col:
-        st.subheader("Infrastructure Metrics Over Time")
-        df_infra_sorted = df_infra.sort_values(by='timestamp')
-        st.line_chart(
-            data=df_infra_sorted.set_index('timestamp')[['CPU %', 'Memory %', 'Disk I/O (IOPS)']],
-            height=300
-        )
-        st.write("**Network Throughput (MB)**")
-        st.line_chart(
-            data=df_infra_sorted.set_index('timestamp')[['Network IN (MB)', 'Network OUT (MB)']],
-            height=200
-        )
-        # Anomalies
-        if show_anomalies:
-            st.subheader("Detected Anomalies")
-            anom_df = df_infra_sorted[df_infra_sorted['is_anomaly'] == True]
-            if not anom_df.empty:
-                st.write("Below rows flagged as anomalies by IsolationForest:")
-                st.table(anom_df[['timestamp','CPU %','Memory %','Network IN (MB)','Network OUT (MB)','Disk I/O (IOPS)','anomaly_score']])
-            else:
-                st.success("No anomalies detected in this time range.")
-        # Clusters
-        if show_clusters:
-            st.subheader("Usage Clusters")
-            cluster_map = {0: "Low Usage Pattern", 1: "Medium Usage Pattern", 2: "High Usage Pattern"}
-            if 'usage_cluster' in df_infra_sorted.columns:
-                cluster_counts = df_infra_sorted['usage_cluster'].value_counts().sort_index()
-                st.write("**Cluster distribution:**")
-                for c in cluster_counts.index:
-                    st.write(f"- Cluster {c} ({cluster_map.get(c, 'Unknown')}): {cluster_counts[c]} data points")
-                st.write("**Sample data with cluster labels:**")
-                st.write(df_infra_sorted[['timestamp','CPU %','Memory %','usage_cluster']].head(10))
-
-    # Right: Predictive Analysis
-    with right_col:
         if show_prediction:
-            st.subheader("Predictive CPU Usage (Next 6 Hours)")
-            st.write("A simple linear regression model on CPU usage over time.")
+            st.subheader("Predictive CPU Trend (Next 6 mins)")
+            st.write("Simple linear regression forecast on CPU usage.")
             hist_df = pd.DataFrame({
                 'timestamp': df_infra_sorted['timestamp'],
                 'CPU %': df_infra_sorted['CPU %']
             })
             hist_df['Predicted CPU %'] = np.nan
             merged_df = hist_df.set_index('timestamp')
-            future_df = pred_df.set_index('timestamp') if 'pred_df' in locals() else None
-            if future_df is not None:
+            if 'pred_df' in locals():
+                future_df = pred_df.set_index('timestamp')
                 merged_df = pd.concat([merged_df, future_df], axis=1)
-            st.line_chart(merged_df[['CPU %','Predicted CPU %']], height=300)
+            st.line_chart(merged_df[['CPU %','Predicted CPU %']], height=250)
 
-    st.info("This combined dashboard demonstrates telescopic filtering (org > BU > region > service) along with basic AIOps ML: anomaly detection (IsolationForest), clustering (KMeans), and prediction (linear regression). Replace mock data with real metrics and refine models for production-level analytics.")
+    st.info("Dashboard includes telescopic filters, key metrics (MTTI, MTTR), and AIOps ML features (anomaly detection, clustering, predictive CPU). Common GenAI errors in the incident feed reflect real HPC/GKE/LLM challenges.")
 
 if __name__ == "__main__":
     main()
